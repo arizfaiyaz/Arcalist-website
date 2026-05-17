@@ -122,32 +122,32 @@ const faqs = [
   {
     question: "Is Arcalist free?",
     answer:
-      "Yes. Arcalist has a free plan with unlimited bookmarks, 3 pages, 10 boards per page, local storage, import/export, drag and drop, and privacy blur.",
+      "Yes. Arcalist includes a free plan with unlimited bookmarks, up to 3 pages, up to 10 boards per page, local storage, import/export, drag and drop, and privacy blur.",
   },
   {
-    question: "What do I get with Pro?",
+    question: "What does Pro unlock?",
     answer:
-      "Pro unlocks unlimited pages, unlimited boards, cloud sync, cross-browser sync, smart collections, productivity analytics, premium themes, custom wallpaper upload, and workspace sharing.",
+      "Pro unlocks unlimited pages, unlimited boards, cloud sync, cross-browser sync, smart collections, productivity analytics, custom wallpaper upload, premium themes, and sharing features.",
   },
   {
-    question: "Can I use Arcalist without cloud sync?",
+    question: "Can I use Arcalist without signing in?",
     answer:
-      "Yes. Arcalist is local-first, so you can organize bookmarks without signing in or syncing.",
+      "Yes. Arcalist is local-first, so you can start organizing bookmarks without needing cloud sync right away.",
   },
   {
     question: "Can I import my existing bookmarks?",
     answer:
-      "Yes. Arcalist supports importing bookmarks so you can move your existing workflow into a cleaner workspace.",
+      "Yes. You can import your existing bookmarks and organize them into pages and boards inside Arcalist.",
   },
   {
-    question: "Does Arcalist replace my new tab?",
+    question: "Does Arcalist replace my browser's new tab?",
     answer:
-      "Yes. Arcalist turns your browser's new tab into a visual bookmark dashboard.",
+      "Yes. Arcalist transforms the new tab into a visual bookmark workspace designed for cleaner browsing.",
   },
   {
-    question: "Can I share a workspace or page?",
+    question: "Can I share workspaces or pages?",
     answer:
-      "Sharing is planned as a Pro feature, allowing you to share pages or workspaces through links.",
+      "Sharing is planned as a Pro feature, allowing you to share specific pages or workspaces through links.",
   },
 ];
 
@@ -288,7 +288,7 @@ function BackgroundBeamsWithCollision({ children }: { children: ReactNode }) {
               left: `${8 + index * 14}%`,
               animationDelay: `${index * 0.65}s`,
               animationDuration: `${5.6 + index * 0.42}s`,
-              opacity: 0.2 + (index % 3) * 0.045,
+              opacity: 0.34 + (index % 3) * 0.065,
             } as CSSProperties
           }
         />
@@ -1138,7 +1138,7 @@ function UseCaseIcon({ name }: { name: string }) {
 }
 
 function WorkflowSection() {
-  const { ref, isActive } = useTimelineInView();
+  const { ref, isActive, activeStep } = useTimelineInView(steps.length);
 
   return (
     <section
@@ -1155,7 +1155,16 @@ function WorkflowSection() {
             isActive ? "timeline-active" : ""
           }`}
         >
-          <div className="timeline-track left-8 top-0 h-full w-px rounded-full md:left-[10%] md:right-[10%] md:top-8 md:h-px md:w-auto" />
+          <div className="timeline-track left-8 top-0 h-full w-px rounded-full md:left-[10%] md:right-[10%] md:top-8 md:h-px md:w-auto">
+            <div
+              className="timeline-progress"
+              style={
+                {
+                  "--timeline-progress": isActive ? "100%" : "0%",
+                } as CSSProperties
+              }
+            />
+          </div>
           <div className="grid gap-10 md:grid-cols-5 md:gap-6">
           {steps.map((step, index) => (
             <div
@@ -1163,10 +1172,12 @@ function WorkflowSection() {
               className="relative grid grid-cols-[4rem_1fr] items-start gap-5 md:block md:text-center"
             >
               <div
-                className="timeline-node z-10 grid h-16 w-16 place-items-center rounded-full border border-arca-primary/45 bg-arca-bg text-lg font-bold text-arca-text shadow-cyan md:mx-auto"
+                className={`timeline-node z-10 grid h-16 w-16 place-items-center rounded-full border border-arca-primary/45 bg-arca-bg text-lg font-bold text-arca-text md:mx-auto ${
+                  activeStep >= index ? "timeline-node-active" : ""
+                }`}
                 style={
                   {
-                    "--step-delay": `${360 + index * 420}ms`,
+                    "--step-delay": `${260 + index * 520}ms`,
                   } as CSSProperties
                 }
               >
@@ -1184,9 +1195,10 @@ function WorkflowSection() {
   );
 }
 
-function useTimelineInView() {
+function useTimelineInView(stepCount: number) {
   const ref = useRef<HTMLElement | null>(null);
   const [isActive, setIsActive] = useState(false);
+  const [activeStep, setActiveStep] = useState(-1);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
@@ -1195,6 +1207,7 @@ function useTimelineInView() {
 
     if (prefersReducedMotion) {
       setIsActive(true);
+      setActiveStep(stepCount - 1);
       return;
     }
 
@@ -1216,39 +1229,102 @@ function useTimelineInView() {
     observer.observe(node);
 
     return () => observer.disconnect();
-  }, []);
+  }, [stepCount]);
 
-  return { ref, isActive };
+  useEffect(() => {
+    if (!isActive || activeStep >= 0) {
+      return;
+    }
+
+    const timers = Array.from({ length: stepCount }).map((_, index) =>
+      window.setTimeout(() => setActiveStep(index), 240 + index * 560),
+    );
+
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [activeStep, isActive, stepCount]);
+
+  return { ref, isActive, activeStep };
 }
 
 function FaqSection() {
+  const [openIndex, setOpenIndex] = useState(0);
+
   return (
-    <section id="faq" className="px-5 py-24 lg:px-8">
+    <section id="faq" className="px-5 py-28 lg:px-8">
       <div className="mx-auto max-w-4xl">
-        <SectionHeading eyebrow="FAQ" title="Questions before you install" />
-        <div className="mt-10 space-y-4">
-          {faqs.map((faq) => (
-            <CardContainer key={faq.question}>
-              <CardBody className="glass-card p-6">
-                <details className="group">
-                  <CardItem translateZ={18}>
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left text-lg font-semibold text-arca-text">
-                      {faq.question}
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-arca-primary/20 bg-arca-primary/10 text-arca-primary transition group-open:rotate-45">
-                        +
-                      </span>
-                    </summary>
-                  </CardItem>
-                  <CardItem translateZ={12}>
-                    <p className="mt-4 leading-7 text-arca-muted">{faq.answer}</p>
-                  </CardItem>
-                </details>
-              </CardBody>
-            </CardContainer>
+        <SectionHeading
+          eyebrow="FAQ"
+          title="Questions before you install"
+          text="Everything you need to know before making Arcalist your new tab workspace."
+        />
+        <div className="mt-12 space-y-4">
+          {faqs.map((faq, index) => (
+            <FaqItem
+              key={faq.question}
+              faq={faq}
+              isOpen={openIndex === index}
+              onToggle={() => setOpenIndex(openIndex === index ? -1 : index)}
+            />
           ))}
         </div>
       </div>
     </section>
+  );
+}
+
+function FaqItem({
+  faq,
+  isOpen,
+  onToggle,
+}: {
+  faq: (typeof faqs)[number];
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <CardContainer>
+      <CardBody
+        className={`faq-card rounded-3xl border bg-arca-panel/95 p-0 shadow-card backdrop-blur-xl transition duration-300 ${
+          isOpen
+            ? "border-arca-primary/55 shadow-glow"
+            : "border-arca-primary/28 hover:border-arca-primary/45"
+        }`}
+      >
+        <button
+          type="button"
+          className="flex w-full items-center justify-between gap-5 px-6 py-5 text-left sm:px-7"
+          aria-expanded={isOpen}
+          onClick={onToggle}
+        >
+          <CardItem className="text-lg font-bold text-arca-text" translateZ={20}>
+            {faq.question}
+          </CardItem>
+          <CardItem translateZ={28}>
+            <span
+              className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border border-arca-primary/35 bg-arca-secondary/55 text-xl font-semibold text-arca-accent transition duration-300 ${
+                isOpen ? "rotate-45 bg-arca-primary/35" : ""
+              }`}
+              aria-hidden="true"
+            >
+              +
+            </span>
+          </CardItem>
+        </button>
+        <div
+          className={`faq-answer-grid px-6 sm:px-7 ${
+            isOpen ? "faq-answer-open" : ""
+          }`}
+        >
+          <div className="overflow-hidden">
+            <CardItem translateZ={12}>
+              <p className="border-t border-arca-primary/18 pb-6 pt-4 leading-7 text-arca-muted">
+                {faq.answer}
+              </p>
+            </CardItem>
+          </div>
+        </div>
+      </CardBody>
+    </CardContainer>
   );
 }
 
