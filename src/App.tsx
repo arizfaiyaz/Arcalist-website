@@ -8,6 +8,7 @@ import {
 } from "react";
 
 const CHROME_STORE_URL = "https://chrome.google.com/webstore";
+const APP_ICON_URL = "/assets/icon.png";
 const PUBLIC_APP_URL =
   import.meta.env.VITE_PUBLIC_APP_URL ?? "https://arcalist.app";
 const CHECKOUT_RETURN_URL =
@@ -100,6 +101,24 @@ const proFeatures = [
   "Premium themes",
   "Custom wallpaper upload",
   "Workspace and page sharing",
+];
+
+const billingPlans = [
+  {
+    title: "Monthly",
+    price: "$6.50",
+    cadence: "/ month",
+    note: "Flexible Pro access, billed monthly.",
+    cta: "Choose Monthly",
+  },
+  {
+    title: "Yearly",
+    price: "$59.88",
+    cadence: "/ year",
+    note: "Best value at $4.99 per month, billed yearly.",
+    cta: "Choose Yearly",
+    featured: true,
+  },
 ];
 
 const useCases = [
@@ -247,9 +266,13 @@ function Navbar() {
 
 function LogoMark() {
   return (
-    <span className="relative grid h-10 w-10 place-items-center rounded-2xl border border-arca-primary/35 bg-arca-primary/12 shadow-cyan">
-      <span className="absolute inset-1 rounded-xl bg-arca-primary opacity-90" />
-      <span className="relative text-base font-black text-arca-text">A</span>
+    <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-2xl border border-arca-primary/35 bg-arca-panel shadow-cyan">
+      <img
+        src={APP_ICON_URL}
+        alt=""
+        className="h-full w-full object-cover"
+        aria-hidden="true"
+      />
     </span>
   );
 }
@@ -1101,9 +1124,9 @@ function PricingSection({
       <div className="absolute inset-0 subtle-grid opacity-50" />
       <div className="relative mx-auto max-w-6xl">
         <SectionHeading
-          eyebrow="Free vs Pro"
-          title="Start locally. Upgrade when you need more."
-          text="Arcalist stays useful from day one, with Pro designed for people who want unlimited workspaces and sync."
+          eyebrow="Pricing"
+          title="Choose your Pro plan."
+          text="Start free locally, then upgrade when you want unlimited workspaces, sync, and premium organization tools."
         />
         {showCancelNotice && (
           <p className="mx-auto mt-7 max-w-2xl rounded-2xl border border-arca-primary/30 bg-arca-bg/70 px-5 py-4 text-center text-sm font-semibold text-arca-accent shadow-sm">
@@ -1111,23 +1134,23 @@ function PricingSection({
           </p>
         )}
         <div className="mt-12 grid items-stretch gap-6 lg:grid-cols-2">
-          <PlanCard
-            title="Free"
-            subtitle="Everything you need to start organizing."
-            features={freeFeatures}
-            cta="Start Free"
-          />
-          <PlanCard
-            title="Pro"
-            subtitle="For users who want unlimited organization and sync."
-            features={proFeatures}
-            cta="Add to Chrome"
-            featured
-          />
+          {billingPlans.map((plan) => (
+            <PlanCard
+              key={plan.title}
+              title={plan.title}
+              price={plan.price}
+              cadence={plan.cadence}
+              subtitle={plan.note}
+              features={proFeatures}
+              cta={plan.cta}
+              featured={plan.featured}
+            />
+          ))}
         </div>
         <p className="mx-auto mt-7 max-w-3xl text-center text-sm leading-6 text-arca-muted">
-          Pro features will be available after upgrade. Free users can still use
-          Arcalist locally.
+          The free plan still includes unlimited bookmarks, local storage, import /
+          export, drag and drop, privacy blur, up to 3 pages, and up to 10 boards
+          per page.
         </p>
       </div>
     </section>
@@ -1136,12 +1159,16 @@ function PricingSection({
 
 function PlanCard({
   title,
+  price,
+  cadence,
   subtitle,
   features,
   cta,
   featured = false,
 }: {
   title: string;
+  price: string;
+  cadence: string;
   subtitle: string;
   features: string[];
   cta: string;
@@ -1155,13 +1182,21 @@ function PlanCard({
       }`}
     >
       <CardItem className="flex items-start justify-between gap-4" translateZ={24}>
-        <div>
+        <div className="min-w-0">
           <h3 className="text-3xl font-bold text-arca-text">{title}</h3>
-          <p className="mt-2 text-arca-muted">{subtitle}</p>
+          <div className="mt-5 flex flex-wrap items-end gap-x-2 gap-y-1">
+            <span className="text-5xl font-bold tracking-normal text-arca-text">
+              {price}
+            </span>
+            <span className="pb-1 text-base font-semibold text-arca-muted">
+              {cadence}
+            </span>
+          </div>
+          <p className="mt-4 text-arca-muted">{subtitle}</p>
         </div>
         {featured && (
           <span className="rounded-full border border-arca-primary/40 bg-arca-primary/10 px-3 py-1 text-xs font-semibold text-arca-primary">
-            Upgrade
+            Best value
           </span>
         )}
       </CardItem>
