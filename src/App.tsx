@@ -253,6 +253,14 @@ function App() {
     );
   }
 
+  if (route === "/privacy") {
+    return (
+      <PageShell>
+        <PrivacyPolicyPage />
+      </PageShell>
+    );
+  }
+
   return (
     <PageShell>
       <main>
@@ -1509,6 +1517,57 @@ function PricingPage() {
   );
 }
 
+function PrivacyPolicyPage() {
+  const sections = [
+    {
+      title: "Information We Collect",
+      body: "Arcalist is designed around browser-based bookmark organization. Bookmark data you create in the extension is stored locally in your browser unless you choose to use features that require syncing, sharing, billing, or support.",
+    },
+    {
+      title: "How We Use Information",
+      body: "We use information only to provide, maintain, protect, and improve Arcalist, including account access, Pro billing, shared pages, customer support, and product reliability.",
+    },
+    {
+      title: "Sharing",
+      body: "We do not sell your personal information. We may share limited data with service providers that help operate Arcalist, such as hosting, database, analytics, payment, or support providers.",
+    },
+    {
+      title: "Your Choices",
+      body: "You can export or delete your local bookmark data from the extension. If you use account-based or paid features, you can contact us to request access, correction, or deletion of account-related information.",
+    },
+    {
+      title: "Contact",
+      body: "For privacy questions or requests, contact the Arcalist team through the support channel listed in the extension or store listing.",
+    },
+  ];
+
+  return (
+    <main className="px-5 pb-24 pt-32 lg:px-8">
+      <section className="mx-auto max-w-4xl">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-arca-anchor">
+          Legal
+        </p>
+        <h1 className="mt-4 text-4xl font-bold tracking-normal text-arca-text sm:text-6xl">
+          Privacy Policy
+        </h1>
+        <p className="mt-5 max-w-3xl text-lg leading-8 text-arca-muted">
+          Last updated: May 20, 2026
+        </p>
+        <div className="mt-12 space-y-8 rounded-[2rem] border border-arca-primary/30 bg-arca-panel/90 p-6 shadow-card ring-1 ring-white/55 sm:p-10">
+          {sections.map((section) => (
+            <section key={section.title}>
+              <h2 className="text-xl font-semibold text-arca-text">
+                {section.title}
+              </h2>
+              <p className="mt-3 leading-7 text-arca-muted">{section.body}</p>
+            </section>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
+}
+
 function isCheckoutCancellation() {
   const params = new URLSearchParams(window.location.search);
   const status = params.get("status")?.trim().toLowerCase();
@@ -1930,7 +1989,7 @@ function FinalCtaSection() {
 function Footer() {
   return (
     <footer className="border-t border-arca-primary/15 px-5 py-10 lg:px-8">
-      <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1.5fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-3">
             <LogoMark />
@@ -1951,15 +2010,42 @@ function Footer() {
         <FooterLinks
           title="Legal"
           links={[
-            { label: "Privacy Policy", href: "#" },
+            { label: "Privacy Policy", href: "/privacy" },
             { label: "Terms of Service", href: "#" },
           ]}
         />
+        <div>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-arca-anchor">
+            Social
+          </h2>
+          <a
+            href="https://x.com/thatnerdwalaguy"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Visit @thatnerdwalaguy on X"
+            className="mt-4 inline-grid h-10 w-10 place-items-center rounded-full border border-arca-primary/30 bg-arca-panel text-arca-muted transition hover:border-arca-primary/60 hover:text-arca-text"
+          >
+            <XLogo />
+          </a>
+        </div>
       </div>
       <p className="mx-auto mt-10 max-w-7xl text-sm text-arca-muted">
         © 2026 Arcalist. All rights reserved.
       </p>
     </footer>
+  );
+}
+
+function XLogo() {
+  return (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M18.9 2h3.2l-7 8 8.2 12h-6.4l-5-7.3L6.2 22H3l7.5-8.6L2.7 2h6.6l4.5 6.5L18.9 2Zm-1.1 17.9h1.8L8.3 4H6.4l11.4 15.9Z" />
+    </svg>
   );
 }
 
