@@ -16,6 +16,8 @@ const CHECKOUT_RETURN_URL =
   `${PUBLIC_APP_URL}/billing/return`;
 const CHECKOUT_CANCEL_URL =
   import.meta.env.VITE_CHECKOUT_CANCEL_URL ?? `${PUBLIC_APP_URL}/pricing`;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Do not expose Dodo secret keys in frontend. Checkout sessions requiring secrets must be created server-side.
 const checkoutRedirectUrls = {
@@ -24,6 +26,44 @@ const checkoutRedirectUrls = {
   // Server-side checkout creation should pass this as cancel_url.
   cancelUrl: CHECKOUT_CANCEL_URL,
 };
+
+type SharedBookmarkSnapshot = {
+  id?: string;
+  title?: string;
+  url?: string;
+  faviconUrl?: string;
+  order?: number;
+};
+
+type SharedBoardSnapshot = {
+  id?: string;
+  title?: string;
+  order?: number;
+  bookmarks?: SharedBookmarkSnapshot[];
+};
+
+type SharedPageSnapshot = {
+  version?: number;
+  page?: {
+    id?: string;
+    title?: string;
+  };
+  boards?: SharedBoardSnapshot[];
+};
+
+type SharedPageRow = {
+  id: string;
+  share_token: string;
+  title: string | null;
+  snapshot: SharedPageSnapshot | null;
+  updated_at: string | null;
+};
+
+type SharedPageState =
+  | { status: "loading" }
+  | { status: "ready"; page: SharedPageRow }
+  | { status: "unavailable" }
+  | { status: "error"; message: string };
 
 const navLinks = [
   { label: "Features", href: "/#features" },
@@ -187,6 +227,15 @@ const faqs = [
 
 function App() {
   const route = getCurrentRoute();
+  const shareToken = getShareToken();
+
+  if (shareToken) {
+    return (
+      <PageShell>
+        <SharedPageViewer token={shareToken} />
+      </PageShell>
+    );
+  }
 
   if (route === "/billing/return") {
     return (
@@ -233,6 +282,16 @@ function getCurrentRoute() {
   const pathname = window.location.pathname.replace(/\/+$/, "");
 
   return pathname || "/";
+}
+
+function getShareToken() {
+  const pathParts = window.location.pathname.split("/").filter(Boolean);
+
+  if (pathParts[0] !== "share" || !pathParts[1]) {
+    return null;
+  }
+
+  return decodeURIComponent(pathParts[1]).trim() || null;
 }
 
 function Navbar() {
@@ -1037,6 +1096,359 @@ function FeatureIcon({ name }: { name: string }) {
       <path d="M21 13a8 8 0 0 1-13.6 5.6L3 17" />
     </svg>
   );
+}
+
+function SharedPageViewer({ token }: { token: string }) {
+  const [state, setState] = useState<SharedPageState>({ status: "loading" });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSharedPage() {
+      setState({ status: "loading" });
+
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        setState({
+          status: "error",
+          message:
+            "Shared pages are not configured yet. Add the public Supabase environment variables.",
+        });
+        return;
+      }
+
+      try {
+        const page = await fetchSharedPage(token);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setState(page ? { status: "ready", page } : { status: "unavailable" });
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setState({
+          status: "error",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Unable to load this shared page right now.",
+        });
+      }
+    }
+
+    void loadSharedPage();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [token]);
+
+  if (state.status === "loading") {
+    return (
+      <SharedPageFrame>
+        <div className="mx-auto flex min-h-[52vh] max-w-3xl items-center justify-center text-center">
+          <p className="rounded-2xl border border-arca-primary/25 bg-arca-panel/85 px-6 py-4 text-sm font-semibold text-arca-muted shadow-card">
+            Loading shared page...
+          </p>
+        </div>
+      </SharedPageFrame>
+    );
+  }
+
+  if (state.status === "unavailable") {
+    return (
+      <SharedPageFrame>
+        <SharedPageNotice title="This shared page is unavailable or has been revoked." />
+      </SharedPageFrame>
+    );
+  }
+
+  if (state.status === "error") {
+    return (
+      <SharedPageFrame>
+        <SharedPageNotice
+          title="This shared page is unavailable or has been revoked."
+          text={state.message}
+        />
+      </SharedPageFrame>
+    );
+  }
+
+  const pageTitle =
+    state.page.title?.trim() ||
+    state.page.snapshot?.page?.title?.trim() ||
+    "Shared Arcalist page";
+  const boards = getSortedBoards(state.page.snapshot);
+
+  return (
+    <SharedPageFrame>
+      <section className="mx-auto max-w-7xl">
+        <div className="max-w-3xl">
+          <p className="text-sm font-bold uppercase tracking-[0.22em] text-arca-accent">
+            Shared Arcalist page
+          </p>
+          <h1 className="mt-4 text-4xl font-bold leading-tight tracking-normal text-arca-text sm:text-5xl">
+            {pageTitle}
+          </h1>
+          <p className="mt-5 text-base leading-7 text-arca-muted sm:text-lg">
+            Read-only bookmark collection shared from Arcalist.
+          </p>
+        </div>
+
+        {boards.length > 0 ? (
+          <div className="mt-10 grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+            {boards.map((board, index) => (
+              <SharedBoardCard
+                key={board.id || `${board.title}-${index}`}
+                board={board}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-10 rounded-3xl border border-arca-primary/25 bg-arca-panel/85 px-6 py-10 text-center shadow-card">
+            <p className="text-sm font-semibold text-arca-muted">
+              This shared page does not contain any boards yet.
+            </p>
+          </div>
+        )}
+      </section>
+    </SharedPageFrame>
+  );
+}
+
+async function fetchSharedPage(token: string) {
+  const baseUrl = SUPABASE_URL?.replace(/\/+$/, "");
+
+  if (!baseUrl || !SUPABASE_ANON_KEY) {
+    throw new Error("Missing Supabase public configuration.");
+  }
+
+  const params = new URLSearchParams({
+    select: "id,share_token,title,snapshot,updated_at",
+    share_token: `eq.${token}`,
+    is_active: "eq.true",
+    limit: "1",
+  });
+
+  const response = await fetch(`${baseUrl}/rest/v1/shared_pages?${params}`, {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to load this shared page right now.");
+  }
+
+  const rows = (await response.json()) as SharedPageRow[];
+
+  return rows[0] ?? null;
+}
+
+function SharedPageFrame({ children }: { children: ReactNode }) {
+  return (
+    <main className="relative isolate min-h-screen px-5 pb-24 pt-32 lg:px-8">
+      <div className="absolute inset-0 -z-20 subtle-grid opacity-55" />
+      <div className="absolute left-[-7rem] top-28 -z-10 h-72 w-72 rounded-full bg-arca-primary/20 blur-3xl" />
+      <div className="absolute bottom-24 right-[-7rem] -z-10 h-80 w-80 rounded-full bg-arca-secondary/60 blur-3xl" />
+      {children}
+    </main>
+  );
+}
+
+function SharedPageNotice({
+  title,
+  text,
+}: {
+  title: string;
+  text?: string;
+}) {
+  return (
+    <div className="mx-auto flex min-h-[52vh] max-w-3xl items-center justify-center text-center">
+      <section className="w-full rounded-[2rem] border border-arca-primary/30 bg-arca-panel/90 px-6 py-12 shadow-card backdrop-blur-xl sm:px-10">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-arca-primary/35 bg-arca-primary/12 text-arca-accent">
+          <svg
+            className="h-7 w-7"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M9 9h.01" />
+            <path d="M15 9h.01" />
+            <path d="M8 16h8" />
+          </svg>
+        </div>
+        <h1 className="mt-6 text-3xl font-bold tracking-normal text-arca-text sm:text-4xl">
+          {title}
+        </h1>
+        {text && <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-arca-muted">{text}</p>}
+        <a
+          href="/"
+          className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-arca-primary px-6 py-3 text-sm font-semibold text-arca-text shadow-glow transition hover:-translate-y-0.5 hover:bg-arca-secondary focus:outline-none focus:ring-2 focus:ring-arca-primary focus:ring-offset-2 focus:ring-offset-arca-bg"
+        >
+          Go to Arcalist
+        </a>
+      </section>
+    </div>
+  );
+}
+
+function SharedBoardCard({ board }: { board: SharedBoardSnapshot }) {
+  const bookmarks = getSortedBookmarks(board.bookmarks);
+
+  return (
+    <section className="flex min-h-0 flex-col rounded-3xl border border-arca-primary/30 bg-arca-panel/95 p-5 shadow-card backdrop-blur-xl">
+      <div className="flex items-start justify-between gap-4 border-b border-arca-primary/15 pb-4">
+        <h2 className="min-w-0 text-xl font-bold text-arca-text">
+          {board.title?.trim() || "Untitled board"}
+        </h2>
+        <span className="shrink-0 rounded-full bg-arca-primary/12 px-3 py-1 text-xs font-semibold text-arca-accent">
+          {bookmarks.length}
+        </span>
+      </div>
+
+      {bookmarks.length > 0 ? (
+        <ul className="mt-4 space-y-3">
+          {bookmarks.map((bookmark, index) => (
+            <SharedBookmarkItem
+              key={bookmark.id || `${bookmark.url}-${index}`}
+              bookmark={bookmark}
+            />
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-5 text-sm leading-6 text-arca-muted">
+          No bookmarks in this board.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function SharedBookmarkItem({ bookmark }: { bookmark: SharedBookmarkSnapshot }) {
+  const safeUrl = getSafeHttpUrl(bookmark.url);
+  const safeFaviconUrl = getSafeHttpUrl(bookmark.faviconUrl);
+  const displayUrl = safeUrl ? getDisplayUrl(safeUrl) : "Invalid URL";
+  const title = bookmark.title?.trim() || displayUrl;
+
+  const content = (
+    <>
+      <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl border border-arca-primary/20 bg-arca-bg/80">
+        {safeFaviconUrl ? (
+          <img
+            src={safeFaviconUrl}
+            alt=""
+            className="h-5 w-5 object-contain"
+            loading="lazy"
+            aria-hidden="true"
+          />
+        ) : (
+          <span className="text-sm font-bold text-arca-accent" aria-hidden="true">
+            {title.slice(0, 1).toUpperCase()}
+          </span>
+        )}
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-semibold text-arca-text">
+          {title}
+        </span>
+        <span className="mt-1 block truncate text-xs text-arca-muted">
+          {displayUrl}
+        </span>
+      </span>
+    </>
+  );
+
+  if (!safeUrl) {
+    return (
+      <li className="flex items-center gap-3 rounded-2xl border border-arca-primary/15 bg-arca-bg/55 px-3 py-3 opacity-70">
+        {content}
+      </li>
+    );
+  }
+
+  return (
+    <li>
+      <a
+        href={safeUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-3 rounded-2xl border border-arca-primary/15 bg-arca-bg/55 px-3 py-3 transition hover:-translate-y-0.5 hover:border-arca-primary/45 hover:bg-arca-secondary/45 focus:outline-none focus:ring-2 focus:ring-arca-primary focus:ring-offset-2 focus:ring-offset-arca-panel"
+      >
+        {content}
+      </a>
+    </li>
+  );
+}
+
+function getSortedBoards(snapshot: SharedPageSnapshot | null) {
+  const boards = Array.isArray(snapshot?.boards) ? snapshot.boards : [];
+
+  return [...boards].sort(compareByOrderThenTitle);
+}
+
+function getSortedBookmarks(bookmarks: SharedBookmarkSnapshot[] | undefined) {
+  const bookmarkList = Array.isArray(bookmarks) ? bookmarks : [];
+
+  return [...bookmarkList].sort(compareByOrderThenTitle);
+}
+
+function compareByOrderThenTitle<
+  T extends { order?: number; title?: string },
+>(left: T, right: T) {
+  const leftOrder =
+    typeof left.order === "number" && Number.isFinite(left.order)
+      ? left.order
+      : Number.MAX_SAFE_INTEGER;
+  const rightOrder =
+    typeof right.order === "number" && Number.isFinite(right.order)
+      ? right.order
+      : Number.MAX_SAFE_INTEGER;
+
+  if (leftOrder !== rightOrder) {
+    return leftOrder - rightOrder;
+  }
+
+  return (left.title ?? "").localeCompare(right.title ?? "");
+}
+
+function getSafeHttpUrl(url: string | undefined) {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      return null;
+    }
+
+    return parsedUrl.toString();
+  } catch {
+    return null;
+  }
+}
+
+function getDisplayUrl(url: string) {
+  try {
+    const parsedUrl = new URL(url);
+    const path = parsedUrl.pathname === "/" ? "" : parsedUrl.pathname;
+
+    return `${parsedUrl.hostname}${path}`;
+  } catch {
+    return url;
+  }
 }
 
 function BillingReturnPage() {
