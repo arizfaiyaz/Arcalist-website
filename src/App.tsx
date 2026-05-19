@@ -52,11 +52,11 @@ type SharedPageSnapshot = {
 };
 
 type SharedPageRow = {
-  id: string;
-  share_token: string;
   title: string | null;
   snapshot: SharedPageSnapshot | null;
+  view_count?: number | null;
   updated_at: string | null;
+  last_viewed_at?: string | null;
 };
 
 type SharedPageState =
@@ -1226,19 +1226,15 @@ async function fetchSharedPage(token: string) {
     throw new Error("Missing Supabase public configuration.");
   }
 
-  const params = new URLSearchParams({
-    select: "id,share_token,title,snapshot,updated_at",
-    share_token: `eq.${token}`,
-    is_active: "eq.true",
-    limit: "1",
-  });
-
-  const response = await fetch(`${baseUrl}/rest/v1/shared_pages?${params}`, {
+  const response = await fetch(`${baseUrl}/rest/v1/rpc/get_shared_page_by_token`, {
+    method: "POST",
     headers: {
       apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       Accept: "application/json",
+      "Content-Type": "application/json",
     },
+    body: JSON.stringify({ p_token: token }),
   });
 
   if (!response.ok) {
