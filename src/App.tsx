@@ -204,11 +204,6 @@ const faqs = [
       "Pro unlocks unlimited pages, unlimited boards, cloud sync, cross-browser sync, smart collections, productivity analytics, custom wallpaper upload, premium themes, and sharing features.",
   },
   {
-    question: "Can I use Arcalist without signing in?",
-    answer:
-      "Yes. Arcalist is local-first, so you can start organizing bookmarks without needing cloud sync right away.",
-  },
-  {
     question: "Can I import my existing bookmarks?",
     answer:
       "Yes. You can import your existing bookmarks and organize them into pages and boards inside Arcalist.",
@@ -221,7 +216,7 @@ const faqs = [
   {
     question: "Can I share workspaces or pages?",
     answer:
-      "Sharing is planned as a Pro feature, allowing you to share specific pages or workspaces through links.",
+      "Yes. Workspace and page sharing is available, so you can create shareable links for organized bookmark pages when you want to collaborate or publish a collection.",
   },
 ];
 
@@ -257,6 +252,14 @@ function App() {
     return (
       <PageShell>
         <PrivacyPolicyPage />
+      </PageShell>
+    );
+  }
+
+  if (route === "/terms") {
+    return (
+      <PageShell>
+        <TermsPage />
       </PageShell>
     );
   }
@@ -1520,24 +1523,93 @@ function PricingPage() {
 function PrivacyPolicyPage() {
   const sections = [
     {
-      title: "Information We Collect",
-      body: "Arcalist is designed around browser-based bookmark organization. Bookmark data you create in the extension is stored locally in your browser unless you choose to use features that require syncing, sharing, billing, or support.",
+      title: "Overview",
+      body: [
+        "Arcalist is a bookmark manager and new-tab workspace for browsers. This Privacy Policy explains what information Arcalist may collect, how it is used, when it may be shared, and the choices available to you.",
+        "Arcalist is designed to be local-first. Bookmark data that you create in the extension is stored locally in your browser unless you choose to use features that require cloud services, such as account access, sync, sharing, Pro billing, support, or similar hosted features.",
+      ],
+    },
+    {
+      title: "Information We May Collect",
+      body: [
+        "Local bookmark information: bookmark titles, URLs, favicons, page names, board names, ordering, layout preferences, and related workspace settings you create in Arcalist.",
+        "Account and subscription information: email address, account identifiers, plan status, billing status, and payment metadata needed to provide paid features. Full payment card details are handled by the payment processor and are not stored by Arcalist.",
+        "Cloud and sharing data: content you choose to sync or share, including shared page snapshots, workspace names, bookmark metadata, share links, timestamps, and related usage details needed to deliver those features.",
+        "Technical and usage information: browser type, extension version, device or environment information, server logs, error reports, diagnostic events, approximate region, and aggregated usage metrics used for reliability, security, and product improvement.",
+        "Support communications: messages, attachments, contact details, and other information you provide when asking for help or contacting Arcalist.",
+      ],
     },
     {
       title: "How We Use Information",
-      body: "We use information only to provide, maintain, protect, and improve Arcalist, including account access, Pro billing, shared pages, customer support, and product reliability.",
+      body: [
+        "We use information to provide and maintain Arcalist, including bookmark organization, sync, sharing, account management, Pro access, billing, import/export, support, security, abuse prevention, analytics, troubleshooting, and product improvement.",
+        "We do not use bookmark data or Chrome extension user data for personalized advertising, retargeting, or interest-based advertising.",
+        "We use browser permissions and user data only to provide or improve Arcalist's user-facing features and only as reasonably necessary for the product's bookmark-management purpose.",
+      ],
     },
     {
-      title: "Sharing",
-      body: "We do not sell your personal information. We may share limited data with service providers that help operate Arcalist, such as hosting, database, analytics, payment, or support providers.",
+      title: "Chrome Web Store Limited Use Disclosure",
+      body: [
+        "Arcalist's use and transfer of information received from Chrome extension APIs follows the Chrome Web Store User Data Policy, including the Limited Use requirements.",
+        "Arcalist uses extension data only to provide or improve its single purpose and user-facing features, does not transfer this data except as necessary to provide or improve Arcalist, comply with law, protect security, or complete a merger, acquisition, or sale of assets, and does not use or transfer this data for personalized advertising.",
+        "Human access to user data is restricted and only occurs when necessary for support with your permission, security and abuse investigation, legal compliance, or internal operations using aggregated or anonymized information.",
+      ],
     },
     {
-      title: "Your Choices",
-      body: "You can export or delete your local bookmark data from the extension. If you use account-based or paid features, you can contact us to request access, correction, or deletion of account-related information.",
+      title: "How We Share Information",
+      body: [
+        "We do not sell your personal information.",
+        "We may share limited information with service providers that help operate Arcalist, such as hosting, database, authentication, analytics, error monitoring, payment processing, email, support, and infrastructure providers. These providers are authorized to use information only as needed to provide services to Arcalist.",
+        "We may disclose information if required by law, legal process, or government request, or when we believe disclosure is reasonably necessary to protect users, prevent fraud or abuse, enforce our terms, or protect the rights, property, or safety of Arcalist or others.",
+        "If Arcalist is involved in a merger, acquisition, financing, reorganization, or sale of assets, information may be transferred as part of that transaction, subject to appropriate confidentiality and continuity protections.",
+      ],
+    },
+    {
+      title: "Security",
+      body: [
+        "We use reasonable administrative, technical, and organizational safeguards designed to protect information against unauthorized access, loss, misuse, or alteration.",
+        "When personal or sensitive user data is transmitted to hosted Arcalist services, it is transmitted over secure connections such as HTTPS. No online service can guarantee absolute security, but we work to keep data handling limited to what is needed for the product.",
+      ],
+    },
+    {
+      title: "Retention and Deletion",
+      body: [
+        "Local data remains in your browser until you delete it, uninstall the extension, reset browser storage, or use Arcalist's export/delete controls.",
+        "Cloud, shared, account, billing, support, and operational records are retained only for as long as needed to provide Arcalist, comply with legal obligations, resolve disputes, enforce agreements, prevent abuse, and maintain security.",
+        "You may request deletion of account-related information through the support channel listed in the extension or Chrome Web Store listing. Some information may be retained where required for legal, tax, security, fraud-prevention, or legitimate business purposes.",
+      ],
+    },
+    {
+      title: "Your Choices and Rights",
+      body: [
+        "You can export or delete local bookmark data from Arcalist where those controls are available.",
+        "You can choose whether to use optional cloud, sharing, sync, Pro, and support features. If you do not use those features, related data does not need to be sent to Arcalist's hosted services.",
+        "Depending on your location, you may have rights to request access, correction, deletion, portability, restriction, or objection regarding personal information. You may exercise those rights through the support channel listed in the extension or Chrome Web Store listing.",
+      ],
+    },
+    {
+      title: "Children",
+      body: [
+        "Arcalist is not directed to children under 13 and is not intended to knowingly collect personal information from children. If you believe a child has provided personal information to Arcalist, contact us so we can take appropriate action.",
+      ],
+    },
+    {
+      title: "Third-Party Services",
+      body: [
+        "Arcalist may link to third-party websites or services, including websites saved as bookmarks. This Privacy Policy does not apply to third-party websites, services, or content that Arcalist does not control.",
+      ],
+    },
+    {
+      title: "Changes to This Policy",
+      body: [
+        "We may update this Privacy Policy from time to time. When we make material changes, we will update the effective date and, when appropriate, provide additional notice through the website, extension, store listing, or product experience.",
+      ],
     },
     {
       title: "Contact",
-      body: "For privacy questions or requests, contact the Arcalist team through the support channel listed in the extension or store listing.",
+      body: [
+        "For privacy questions or requests, contact the Arcalist team through the support channel listed in the extension or Chrome Web Store listing.",
+      ],
     },
   ];
 
@@ -1559,7 +1631,166 @@ function PrivacyPolicyPage() {
               <h2 className="text-xl font-semibold text-arca-text">
                 {section.title}
               </h2>
-              <p className="mt-3 leading-7 text-arca-muted">{section.body}</p>
+              <div className="mt-3 space-y-3">
+                {section.body.map((paragraph) => (
+                  <p key={paragraph} className="leading-7 text-arca-muted">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function TermsPage() {
+  const sections = [
+    {
+      title: "Acceptance of Terms",
+      body: [
+        "These Terms and Conditions govern your access to and use of Arcalist, including the website, browser extension, local features, hosted services, shared pages, Pro features, and related support services.",
+        "By installing, accessing, or using Arcalist, you agree to these Terms. If you do not agree, do not use Arcalist.",
+      ],
+    },
+    {
+      title: "Eligibility and Accounts",
+      body: [
+        "You must be able to form a binding agreement under applicable law to use Arcalist. If you use Arcalist on behalf of an organization, you represent that you have authority to bind that organization.",
+        "You are responsible for keeping account credentials secure and for all activity under your account. Notify us promptly if you believe your account has been compromised.",
+      ],
+    },
+    {
+      title: "License and Product Use",
+      body: [
+        "Subject to these Terms, Arcalist grants you a limited, revocable, non-exclusive, non-transferable license to use Arcalist for personal or internal business bookmark organization.",
+        "You may not copy, modify, reverse engineer, resell, sublicense, interfere with, or misuse Arcalist except where applicable law gives you rights that cannot be limited by these Terms.",
+      ],
+    },
+    {
+      title: "Your Content and Bookmark Data",
+      body: [
+        "You retain ownership of bookmarks, page names, board names, shared page content, custom assets, and other content you add to Arcalist.",
+        "You grant Arcalist a limited license to host, process, transmit, display, and back up your content only as needed to operate, secure, support, and improve Arcalist and the features you choose to use.",
+        "You are responsible for the content you save, import, sync, or share through Arcalist, including ensuring that you have rights to use and share it.",
+      ],
+    },
+    {
+      title: "Acceptable Use",
+      body: [
+        "You may not use Arcalist to violate law, infringe rights, distribute malware, abuse shared links, interfere with service operation, attempt unauthorized access, scrape or overload systems, or store or share unlawful, harmful, deceptive, or abusive content.",
+        "We may suspend or restrict access if we reasonably believe your use creates risk, violates these Terms, harms users, or could expose Arcalist to liability.",
+      ],
+    },
+    {
+      title: "Free and Paid Features",
+      body: [
+        "Arcalist may offer free and paid features. Pro features, pricing, limits, availability, and billing terms may change over time, but changes will not reduce features you have already paid for during the then-current billing period unless required for security, legal, or operational reasons.",
+        "Payments are processed by third-party payment providers. You authorize applicable charges, taxes, renewals, and plan changes shown at checkout. Refunds, cancellations, and renewal behavior are governed by the checkout flow, payment provider terms, and applicable law.",
+      ],
+    },
+    {
+      title: "Third-Party Services",
+      body: [
+        "Arcalist may depend on or link to third-party services, including browser platforms, Chrome Web Store, payment processors, hosting providers, analytics providers, authentication providers, and websites you save as bookmarks.",
+        "Third-party services are governed by their own terms and policies. Arcalist is not responsible for third-party content, services, availability, security, or practices.",
+      ],
+    },
+    {
+      title: "Intellectual Property",
+      body: [
+        "Arcalist, including its name, branding, interface, software, design, graphics, and related materials, is owned by Arcalist or its licensors and is protected by intellectual property laws.",
+        "These Terms do not transfer any ownership rights in Arcalist to you.",
+      ],
+    },
+    {
+      title: "Service Changes and Availability",
+      body: [
+        "Arcalist may update, improve, suspend, discontinue, or modify features from time to time. We aim to provide a reliable service, but we do not guarantee uninterrupted or error-free operation.",
+        "You are responsible for maintaining your own backups of important bookmark data, including by using export features where available.",
+      ],
+    },
+    {
+      title: "Privacy",
+      body: [
+        "Your use of Arcalist is also governed by the Privacy Policy, which explains how information is collected, used, shared, secured, retained, and deleted.",
+      ],
+    },
+    {
+      title: "Disclaimers",
+      body: [
+        "Arcalist is provided on an as-is and as-available basis. To the fullest extent permitted by law, Arcalist disclaims warranties of merchantability, fitness for a particular purpose, non-infringement, availability, accuracy, and uninterrupted operation.",
+        "Arcalist does not control the availability, accuracy, safety, or legality of websites you bookmark or visit.",
+      ],
+    },
+    {
+      title: "Limitation of Liability",
+      body: [
+        "To the fullest extent permitted by law, Arcalist and its owners, operators, affiliates, suppliers, and service providers will not be liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or for loss of profits, revenue, data, goodwill, or business opportunities.",
+        "To the fullest extent permitted by law, Arcalist's total liability for any claim relating to the service will not exceed the greater of the amount you paid to Arcalist for the service in the three months before the claim or INR 5,000.",
+      ],
+    },
+    {
+      title: "Indemnity",
+      body: [
+        "You agree to defend, indemnify, and hold harmless Arcalist and its owners, operators, affiliates, suppliers, and service providers from claims, damages, liabilities, losses, and expenses arising from your content, your misuse of Arcalist, your violation of these Terms, or your violation of law or third-party rights.",
+      ],
+    },
+    {
+      title: "Termination",
+      body: [
+        "You may stop using Arcalist at any time. We may suspend or terminate access if you violate these Terms, create risk, fail to pay applicable fees, or use Arcalist in a way that may harm the service, users, or third parties.",
+        "Sections that by their nature should survive termination will survive, including ownership, payment obligations, disclaimers, limitations of liability, indemnity, and dispute provisions.",
+      ],
+    },
+    {
+      title: "Governing Law",
+      body: [
+        "These Terms are governed by the laws of India, without regard to conflict-of-law rules, unless applicable consumer protection law requires otherwise.",
+        "Courts located in India will have jurisdiction over disputes relating to these Terms, except where applicable law provides you a mandatory right to bring claims elsewhere.",
+      ],
+    },
+    {
+      title: "Changes to Terms",
+      body: [
+        "We may update these Terms from time to time. If changes are material, we will provide notice where appropriate. Continued use of Arcalist after updated Terms become effective means you accept the updated Terms.",
+      ],
+    },
+    {
+      title: "Contact",
+      body: [
+        "For questions about these Terms, contact the Arcalist team through the support channel listed in the extension or Chrome Web Store listing.",
+      ],
+    },
+  ];
+
+  return (
+    <main className="px-5 pb-24 pt-32 lg:px-8">
+      <section className="mx-auto max-w-4xl">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-arca-anchor">
+          Legal
+        </p>
+        <h1 className="mt-4 text-4xl font-bold tracking-normal text-arca-text sm:text-6xl">
+          Terms and Conditions
+        </h1>
+        <p className="mt-5 max-w-3xl text-lg leading-8 text-arca-muted">
+          Last updated: May 20, 2026
+        </p>
+        <div className="mt-12 space-y-8 rounded-[2rem] border border-arca-primary/30 bg-arca-panel/90 p-6 shadow-card ring-1 ring-white/55 sm:p-10">
+          {sections.map((section) => (
+            <section key={section.title}>
+              <h2 className="text-xl font-semibold text-arca-text">
+                {section.title}
+              </h2>
+              <div className="mt-3 space-y-3">
+                {section.body.map((paragraph) => (
+                  <p key={paragraph} className="leading-7 text-arca-muted">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
             </section>
           ))}
         </div>
@@ -2011,7 +2242,7 @@ function Footer() {
           title="Legal"
           links={[
             { label: "Privacy Policy", href: "/privacy" },
-            { label: "Terms of Service", href: "#" },
+            { label: "Terms and Conditions", href: "/terms" },
           ]}
         />
         <div>
