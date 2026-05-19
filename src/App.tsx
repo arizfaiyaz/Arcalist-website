@@ -8,12 +8,27 @@ import {
 } from "react";
 
 const CHROME_STORE_URL = "https://chrome.google.com/webstore";
+const PUBLIC_APP_URL =
+  import.meta.env.VITE_PUBLIC_APP_URL ?? "https://arcalist.app";
+const CHECKOUT_RETURN_URL =
+  import.meta.env.VITE_CHECKOUT_RETURN_URL ??
+  `${PUBLIC_APP_URL}/billing/return`;
+const CHECKOUT_CANCEL_URL =
+  import.meta.env.VITE_CHECKOUT_CANCEL_URL ?? `${PUBLIC_APP_URL}/pricing`;
+
+// Do not expose Dodo secret keys in frontend. Checkout sessions requiring secrets must be created server-side.
+const checkoutRedirectUrls = {
+  // Server-side checkout creation should pass this as return_url.
+  returnUrl: CHECKOUT_RETURN_URL,
+  // Server-side checkout creation should pass this as cancel_url.
+  cancelUrl: CHECKOUT_CANCEL_URL,
+};
 
 const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Free vs Pro", href: "#pricing" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Features", href: "/#features" },
+  { label: "Free vs Pro", href: "/pricing" },
+  { label: "How It Works", href: "/#how-it-works" },
+  { label: "FAQ", href: "/#faq" },
 ];
 
 const features = [
@@ -152,9 +167,26 @@ const faqs = [
 ];
 
 function App() {
+  const route = getCurrentRoute();
+
+  if (route === "/billing/return") {
+    return (
+      <PageShell>
+        <BillingReturnPage />
+      </PageShell>
+    );
+  }
+
+  if (route === "/pricing") {
+    return (
+      <PageShell>
+        <PricingPage />
+      </PageShell>
+    );
+  }
+
   return (
-    <div className="min-h-screen overflow-hidden bg-arca-bg text-arca-text">
-      <Navbar />
+    <PageShell>
       <main>
         <HeroSection />
         <FeaturesSection />
@@ -164,9 +196,24 @@ function App() {
         <FaqSection />
         <FinalCtaSection />
       </main>
+    </PageShell>
+  );
+}
+
+function PageShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="min-h-screen overflow-hidden bg-arca-bg text-arca-text">
+      <Navbar />
+      {children}
       <Footer />
     </div>
   );
+}
+
+function getCurrentRoute() {
+  const pathname = window.location.pathname.replace(/\/+$/, "");
+
+  return pathname || "/";
 }
 
 function Navbar() {
@@ -176,7 +223,7 @@ function Navbar() {
         className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8"
         aria-label="Main navigation"
       >
-        <a href="#top" className="flex items-center gap-3" aria-label="Arcalist home">
+        <a href="/" className="flex items-center gap-3" aria-label="Arcalist home">
           <LogoMark />
           <span className="text-lg font-semibold tracking-wide">Arcalist</span>
         </a>
@@ -969,7 +1016,86 @@ function FeatureIcon({ name }: { name: string }) {
   );
 }
 
-function PricingSection() {
+function BillingReturnPage() {
+  return (
+    <main className="relative isolate min-h-screen px-5 pb-24 pt-32 lg:px-8">
+      <div className="absolute inset-0 -z-20 subtle-grid opacity-60" />
+      <div className="absolute left-1/2 top-24 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-arca-secondary/80 blur-3xl" />
+      <div className="absolute bottom-20 right-[-6rem] -z-10 h-80 w-80 rounded-full bg-arca-primary/20 blur-3xl" />
+      <div className="mx-auto flex min-h-[calc(100vh-12rem)] max-w-4xl items-center justify-center">
+        <section className="w-full rounded-[2rem] border border-arca-primary/30 bg-arca-panel/90 px-6 py-12 text-center shadow-card backdrop-blur-xl sm:px-10 sm:py-16">
+          {/* This page is only a post-checkout UX page. Pro access must be granted only by the verified Dodo webhook on the backend. */}
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-arca-primary/35 bg-arca-primary/15 text-arca-accent shadow-cyan">
+            <svg
+              className="h-8 w-8"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </div>
+          <h1 className="mt-7 text-4xl font-bold tracking-normal text-arca-text sm:text-5xl">
+            Payment successful
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-arca-muted">
+            Open Arcalist again. Your Pro access will activate automatically once
+            payment is confirmed.
+          </p>
+          <p className="mx-auto mt-5 max-w-2xl text-sm leading-6 text-arca-muted/85">
+            If Pro does not appear immediately, wait a few seconds and refresh
+            Arcalist. Your access is activated securely through payment verification.
+          </p>
+          <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <a
+              href={PUBLIC_APP_URL}
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-arca-primary px-6 py-3 text-sm font-semibold text-arca-text shadow-glow transition hover:-translate-y-0.5 hover:bg-arca-secondary hover:shadow-cyan focus:outline-none focus:ring-2 focus:ring-arca-primary focus:ring-offset-2 focus:ring-offset-arca-bg"
+            >
+              Back to Arcalist
+            </a>
+            <a
+              href={checkoutRedirectUrls.cancelUrl}
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-arca-primary/30 bg-arca-bg/70 px-6 py-3 text-sm font-semibold text-arca-text transition hover:-translate-y-0.5 hover:border-arca-primary/60 hover:bg-arca-secondary/50 focus:outline-none focus:ring-2 focus:ring-arca-highlight focus:ring-offset-2 focus:ring-offset-arca-bg"
+            >
+              Go to pricing
+            </a>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+function PricingPage() {
+  return (
+    <main className="pt-20">
+      <PricingSection showCancelNotice={isCheckoutCancellation()} />
+    </main>
+  );
+}
+
+function isCheckoutCancellation() {
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get("status")?.trim().toLowerCase();
+  const checkout = params.get("checkout")?.trim().toLowerCase();
+
+  return (
+    status === "cancelled" ||
+    status === "canceled" ||
+    checkout === "cancelled" ||
+    checkout === "canceled"
+  );
+}
+
+function PricingSection({
+  showCancelNotice = false,
+}: {
+  showCancelNotice?: boolean;
+}) {
   return (
     <section id="pricing" className="relative bg-arca-section px-5 py-24 lg:px-8">
       <div className="absolute inset-0 subtle-grid opacity-50" />
@@ -979,6 +1105,11 @@ function PricingSection() {
           title="Start locally. Upgrade when you need more."
           text="Arcalist stays useful from day one, with Pro designed for people who want unlimited workspaces and sync."
         />
+        {showCancelNotice && (
+          <p className="mx-auto mt-7 max-w-2xl rounded-2xl border border-arca-primary/30 bg-arca-bg/70 px-5 py-4 text-center text-sm font-semibold text-arca-accent shadow-sm">
+            Checkout cancelled. You can upgrade anytime.
+          </p>
+        )}
         <div className="mt-12 grid items-stretch gap-6 lg:grid-cols-2">
           <PlanCard
             title="Free"
@@ -1369,9 +1500,9 @@ function Footer() {
         <FooterLinks
           title="Product"
           links={[
-            { label: "Features", href: "#features" },
-            { label: "Free vs Pro", href: "#pricing" },
-            { label: "FAQ", href: "#faq" },
+            { label: "Features", href: "/#features" },
+            { label: "Free vs Pro", href: "/pricing" },
+            { label: "FAQ", href: "/#faq" },
           ]}
         />
         <FooterLinks
