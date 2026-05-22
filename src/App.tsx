@@ -382,9 +382,12 @@ function HeroSection() {
       </BackgroundBeamsWithCollision>
       <div className="relative mx-auto max-w-7xl">
         <div className="mx-auto max-w-4xl text-center">
-          <p className="mx-auto mb-6 inline-flex rounded-full border border-arca-primary/45 bg-arca-panel/85 px-4 py-2 text-sm font-semibold text-arca-accent shadow-sm shadow-arca-primary/10 backdrop-blur">
-            Beautiful bookmark organization for your new tab
-          </p>
+          <div className="mx-auto mb-6 flex flex-col items-center gap-2">
+            <p className="inline-flex rounded-full border border-arca-primary/45 bg-arca-panel/85 px-4 py-2 text-sm font-semibold text-arca-accent shadow-sm shadow-arca-primary/10 backdrop-blur">
+              Beautiful bookmark organization for your new tab
+            </p>
+            <NotBackedByYcBadge />
+          </div>
           <h1 className="text-balance text-5xl font-bold leading-tight tracking-normal text-arca-text sm:text-6xl lg:text-7xl">
             Turn your new tab into {article}{" "}
             <ContainerTextFlip
@@ -412,6 +415,20 @@ function HeroSection() {
         <ProductMockup />
       </div>
     </section>
+  );
+}
+
+function NotBackedByYcBadge() {
+  return (
+    <p className="inline-flex items-center gap-1.5 rounded-full border border-arca-primary/35 bg-arca-panel/55 px-3 py-1.5 text-xs font-medium text-arca-muted shadow-sm shadow-arca-primary/5 backdrop-blur">
+      <span>Not backed by</span>
+      <span
+        aria-label="Y Combinator"
+        className="inline-grid h-5 w-5 place-items-center rounded-md bg-[#ff5a1f] text-[13px] font-bold leading-none text-white shadow-sm"
+      >
+        Y
+      </span>
+    </p>
   );
 }
 
