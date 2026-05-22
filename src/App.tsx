@@ -407,10 +407,29 @@ function HeroSection() {
               See Features
             </a>
           </div>
+          <ProductHuntBadge />
         </div>
         <ProductMockup />
       </div>
     </section>
+  );
+}
+
+function ProductHuntBadge() {
+  return (
+    <a
+      href="https://www.producthunt.com/products/arcalist?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-arcalist"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mx-auto mt-6 inline-flex transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-arca-highlight focus:ring-offset-2 focus:ring-offset-arca-bg"
+    >
+      <img
+        alt="Arcalist - Turn your new tab into a visual bookmark workspace | Product Hunt"
+        width="250"
+        height="54"
+        src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1153556&theme=light&t=1779472101449"
+      />
+    </a>
   );
 }
 
