@@ -7,7 +7,8 @@ import {
   useState,
 } from "react";
 
-const CHROME_STORE_URL = "https://chrome.google.com/webstore";
+const CHROME_STORE_URL =
+  "https://chromewebstore.google.com/detail/arcalist/igomkoofmchdbcihnoclfibaffjolanc?hl=en";
 const APP_ICON_URL = "/assets/icon.png";
 const PUBLIC_APP_URL =
   import.meta.env.VITE_PUBLIC_APP_URL ?? "https://arcalist.app";
